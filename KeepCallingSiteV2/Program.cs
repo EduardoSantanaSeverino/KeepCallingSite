@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
 using System.IO;
 using System.Net;
-using System.Timers;
+using System.Threading;
+using Microsoft.Extensions.Configuration;
 
 namespace KeepCallingSiteV2
 {
@@ -18,7 +18,7 @@ namespace KeepCallingSiteV2
 
         private static int lastHour { get; set; }
 
-        private static Timer aTimer { get; set; }
+        private static System.Threading.Timer aTimer { get; set; }
 
         public static void Main(string[] args)
         {
@@ -33,29 +33,48 @@ namespace KeepCallingSiteV2
                 Configuration = builder.Build();
 
                 var elapsedTime = Configuration.GetSection("ElapsedTime").Value;
-                aTimer = new System.Timers.Timer(int.Parse(elapsedTime)); //Ten seconds, (use less to add precision, use more to consume less processor time
-                aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
-                aTimer.Start();
-
-                Console.WriteLine("Please Press Enter to Exit.");
-                Console.ReadKey();
+                
+                int.TryParse(elapsedTime, out var elapsedTimeInt);
+                    
+                aTimer = new System.Threading.Timer(
+                    OnTimedEvent,
+                    null, 
+                    TimeSpan.Zero, 
+                    TimeSpan.FromMinutes(elapsedTimeInt));
+                
+                bool terminate = true;
+                
+                while (terminate)
+                {
+                    Thread.Sleep(TimeSpan.FromMinutes(elapsedTimeInt));
+                    terminate = bool.Parse(Configuration.GetSection("Terminate").Value);
+                }
+                
             }
             catch (Exception ex)
             {
                 SaveLog("Message" + DELIM + ex.Message);
             }
-
         }
         
-        private static void OnTimedEvent(object source, ElapsedEventArgs e)
+        private static void OnTimedEvent(object e)
         {
-            SaveLog("Calling Timed Event Method");
+            PrintIteration();
             if(lastHour < DateTime.Now.Hour || (lastHour == 23 && DateTime.Now.Hour == 0))
             {
                 lastHour = DateTime.Now.Hour;
                 MainApp(); // Call The method with your important staff..
             }
+        }
 
+        private static void PrintIteration()
+        {
+            var logIteration = Configuration.GetSection("LogIteration").Value;
+            bool.TryParse(logIteration, out var logIterationBool);
+            if (logIterationBool)
+            {
+                SaveLog("Calling Timed Event Method");
+            }
         }
 
         private static void MainApp()
