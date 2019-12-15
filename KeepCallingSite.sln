@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeepCallingSite", "KeepCallingSite\KeepCallingSite.csproj", "{0E682843-B546-47CE-9CB6-252232C18E72}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeepCallingSiteV2", "KeepCallingSiteV2\KeepCallingSiteV2.csproj", "{DC6F5E30-0EEF-4BA9-B911-E20C68C4B32F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0E682843-B546-47CE-9CB6-252232C18E72}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0E682843-B546-47CE-9CB6-252232C18E72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0E682843-B546-47CE-9CB6-252232C18E72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC6F5E30-0EEF-4BA9-B911-E20C68C4B32F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC6F5E30-0EEF-4BA9-B911-E20C68C4B32F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC6F5E30-0EEF-4BA9-B911-E20C68C4B32F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC6F5E30-0EEF-4BA9-B911-E20C68C4B32F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
