@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Threading;
+using System.Timers;
 using Microsoft.Extensions.Configuration;
 
 namespace KeepCallingSiteV2
@@ -18,7 +19,7 @@ namespace KeepCallingSiteV2
 
         private static int lastHour { get; set; }
 
-        private static System.Threading.Timer aTimer { get; set; }
+        private static System.Timers.Timer aTimer { get; set; }
 
         public static void Main(string[] args)
         {
@@ -35,13 +36,10 @@ namespace KeepCallingSiteV2
                 var elapsedTime = Configuration.GetSection("ElapsedTime").Value;
                 
                 int.TryParse(elapsedTime, out var elapsedTimeInt);
-                    
-                aTimer = new System.Threading.Timer(
-                    OnTimedEvent,
-                    null, 
-                    TimeSpan.Zero, 
-                    TimeSpan.FromMinutes(elapsedTimeInt));
-                
+                aTimer = new System.Timers.Timer(TimeSpan.FromMinutes(elapsedTimeInt).TotalMilliseconds); //Ten seconds, (use less to add precision, use more to consume less processor time
+                aTimer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
+                aTimer.Start();
+               
                 bool terminate = true;
                 
                 while (terminate)
@@ -53,11 +51,11 @@ namespace KeepCallingSiteV2
             }
             catch (Exception ex)
             {
-                SaveLog("Message" + DELIM + ex.Message);
+                SaveLog(ex);
             }
         }
         
-        private static void OnTimedEvent(object e)
+        private static void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             PrintIteration();
             if(lastHour < DateTime.Now.Hour || (lastHour == 23 && DateTime.Now.Hour == 0))
@@ -128,6 +126,11 @@ namespace KeepCallingSiteV2
             var streamWriter = new StreamWriter(FILENAME, true);
             streamWriter.WriteLine(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + DELIM + message + DELIM + "{ENDLINE}");
             streamWriter.Close();
+        }
+        
+        private static void SaveLog(Exception exception)
+        {
+            SaveLog("Message" + DELIM + exception.Message + ", StackTrace: " + exception.StackTrace);
         }
 
         private static string CreateMessageToLog(string message, string code, string output, string error, string file)
