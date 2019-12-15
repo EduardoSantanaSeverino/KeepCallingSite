@@ -1,55 +1,27 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using System.Threading;
 using Microsoft.Extensions.Configuration;
 
 namespace KeepCallingSiteV2
 {
     public class Program
     {
-        private const string FILENAME = "Log.txt";
-
         private const string DELIM = " | ";
-
-        private const string AppSettingFileName = "appsettings.json";
+        // dotnet publish --self-contained -r rhel.6-x64 -c Release /p:PublishTrimmed=true
 
         private static IConfiguration Configuration { get; set; }
-
-        private static int lastHour { get; set; }
-
-        private static System.Threading.Timer aTimer { get; set; }
 
         public static void Main(string[] args)
         {
             try
             {
-                lastHour = DateTime.Now.Hour;
-                
                 var builder = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile(AppSettingFileName, optional: true, reloadOnChange: true);
+                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
                 
                 Configuration = builder.Build();
-
-                var elapsedTime = Configuration.GetSection("ElapsedTime").Value;
-                
-                int.TryParse(elapsedTime, out var elapsedTimeInt);
-                    
-                aTimer = new System.Threading.Timer(
-                    OnTimedEvent,
-                    null, 
-                    TimeSpan.Zero, 
-                    TimeSpan.FromMinutes(elapsedTimeInt));
-                
-                bool terminate = true;
-                
-                while (terminate)
-                {
-                    Thread.Sleep(TimeSpan.FromMinutes(elapsedTimeInt));
-                    terminate = bool.Parse(Configuration.GetSection("Terminate").Value);
-                }
-                
+                MainApp();
             }
             catch (Exception ex)
             {
@@ -57,26 +29,6 @@ namespace KeepCallingSiteV2
             }
         }
         
-        private static void OnTimedEvent(object e)
-        {
-            PrintIteration();
-            if(lastHour < DateTime.Now.Hour || (lastHour == 23 && DateTime.Now.Hour == 0))
-            {
-                lastHour = DateTime.Now.Hour;
-                MainApp(); // Call The method with your important staff..
-            }
-        }
-
-        private static void PrintIteration()
-        {
-            var logIteration = Configuration.GetSection("LogIteration").Value;
-            bool.TryParse(logIteration, out var logIterationBool);
-            if (logIterationBool)
-            {
-                SaveLog("Calling Timed Event Method");
-            }
-        }
-
         private static void MainApp()
         {
 
@@ -125,7 +77,7 @@ namespace KeepCallingSiteV2
 
         private static void SaveLog(string message)
         {
-            var streamWriter = new StreamWriter(FILENAME, true);
+            var streamWriter = new StreamWriter("Log.txt", true);
             streamWriter.WriteLine(DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss") + DELIM + message + DELIM + "{ENDLINE}");
             streamWriter.Close();
         }
